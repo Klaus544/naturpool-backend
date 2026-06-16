@@ -211,15 +211,25 @@ function App() {
         body:JSON.stringify({
           model:"claude-sonnet-4-6",
           max_tokens:1000,
-          system:`Du bist ein freundlicher Naturpool-Experte. Antworte auf Deutsch, kurz und praktisch. Pool: ${phInfo}. Max 100 Wörter.`,
+          system:`Du bist ein freundlicher Naturpool-Experte. Antworte auf Deutsch, kurz und praktisch. Pool: ${phInfo}. Max 100 Woerter.`,
           messages:history.map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.text}))
         })
       });
-      const data=await res.json();
-      const reply=data.content?.filter(b=>b.type==="text").map(b=>b.text).join("")||"Keine Antwort.";
+      const text=await res.text();
+      let reply="Keine Antwort.";
+      try{
+        const data=JSON.parse(text);
+        if(data.content&&Array.isArray(data.content)){
+          reply=data.content.filter(b=>b.type==="text").map(b=>b.text).join("")||reply;
+        } else if(data.error){
+          reply="Fehler vom Server: "+JSON.stringify(data.error);
+        }
+      }catch(pe){
+        reply="Parse-Fehler: "+text.slice(0,100);
+      }
       setChatMessages(prev=>[...prev,{role:"assistant",text:reply}]);
     }catch(e){
-      setChatMessages(prev=>[...prev,{role:"assistant",text:"Fehler: "+e.message}]);
+      setChatMessages(prev=>[...prev,{role:"assistant",text:"Verbindungsfehler: "+e.message}]);
     }
     setChatLoading(false);
   }
