@@ -135,11 +135,6 @@ function App() {
   const [remDays, setRemDays] = useState("7");
 
   // Shopping list
-  const [shopItems, setShopItems] = useState([]);
-  const [shopName, setShopName] = useState("");
-  const [shopMenge, setShopMenge] = useState("");
-  const [shopEinheit, setShopEinheit] = useState("g");
-  const [shopNote, setShopNote] = useState("");
 
   // Chat
   const [chatMessages, setChatMessages] = useState([
@@ -155,10 +150,9 @@ function App() {
     const d = load();
     if (d.entries) setEntries(d.entries);
     if (d.reminders) setReminders(d.reminders);
-    if (d.shopItems) setShopItems(d.shopItems);
   }, []);
 
-  useEffect(() => { save({ entries, reminders, shopItems }); }, [entries, reminders, shopItems]);
+  useEffect(() => { save({ entries, reminders }); }, [entries, reminders]);
 
   async function analyzePhImage(file) {
     setScanLoading(true);
@@ -360,7 +354,7 @@ Antworte NUR mit einem JSON-Objekt in diesem Format (kein anderer Text):
           { key: "log",       label: "📋 Erfassung" },
           { key: "stats",     label: "📊 Statistik" },
           { key: "reminders", label: `🔔${dueCount ? ` (${dueCount})` : ""}` },
-          { key: "shop",      label: `🛒${shopItems.length ? ` (${shopItems.length})` : ""}` },
+          { key: "chat",      label: "💬 KI" },
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             flex: 1, padding: "13px 6px", border: "none",
@@ -871,118 +865,11 @@ Antworte NUR mit einem JSON-Objekt in diesem Format (kein anderer Text):
           </>
         )}
 
-        {/* ── EINKAUFSLISTE ── */}
-        {tab === "shop" && (
-          <>
-            <Card>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Artikel hinzufügen</div>
-              <div style={{ marginBottom: 10 }}>
-                <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Produkt</label>
-                <input type="text" placeholder="z.B. pH-Senker" value={shopName}
-                  onChange={e => setShopName(e.target.value)} style={inputStyle} />
-              </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-                <div style={{ flex: 2 }}>
-                  <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Menge</label>
-                  <input type="number" min="0" step="0.1" value={shopMenge}
-                    onChange={e => setShopMenge(e.target.value)}
-                    placeholder="z.B. 500" style={{ ...inputStyle, textAlign: "center", fontWeight: 700 }} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Einheit</label>
-                  <select value={shopEinheit} onChange={e => setShopEinheit(e.target.value)} style={inputStyle}>
-                    {["g","kg","ml","l","cl","Stk"].map(u => <option key={u}>{u}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <label style={{ fontSize: 12, color: C.muted, display: "block", marginBottom: 4 }}>Notiz (optional)</label>
-                <input type="text" placeholder="z.B. für Sommer" value={shopNote}
-                  onChange={e => setShopNote(e.target.value)} style={inputStyle} />
-              </div>
-              <Btn label="+ Hinzufügen" onClick={() => {
-                if (!shopName.trim()) return;
-                setShopItems(prev => [...prev, {
-                  id: Date.now(), name: shopName,
-                  menge: shopMenge, einheit: shopEinheit,
-                  note: shopNote, done: false,
-                }]);
-                setShopName(""); setShopMenge(""); setShopNote("");
-              }} style={{ width: "100%" }} />
-            </Card>
-
-            {shopItems.length === 0 ? (
-              <div style={{ textAlign: "center", color: C.muted, padding: "40px 0" }}>
-                <div style={{ fontSize: 36, marginBottom: 8 }}>🛒</div>
-                <div>Einkaufsliste ist leer.</div>
-              </div>
-            ) : (
-              <>
-                {/* Mail-Link */}
-                <button onClick={() => {
-                  const lines = shopItems
-                    .filter(i => !i.done)
-                    .map(i => `- ${i.name}${i.menge ? " · " + i.menge + " " + i.einheit : ""}${i.note ? " (" + i.note + ")" : ""}`)
-                    .join("%0A");
-                  window.location.href = `mailto:?subject=Naturpool%20Einkaufsliste&body=Meine%20Einkaufsliste%3A%0A%0A${lines}`;
-                }} style={{
-                  width: "100%", marginBottom: 12, padding: "11px",
-                  borderRadius: 10, border: `1.5px solid ${C.border}`,
-                  background: "#fff", color: C.accent, fontWeight: 700,
-                  fontSize: 14, cursor: "pointer", display: "flex",
-                  alignItems: "center", justifyContent: "center", gap: 8,
-                }}>
-                  ✉️ Als E-Mail senden
-                </button>
-
-                {shopItems.map(item => (
-                  <div key={item.id} style={{
-                    background: C.card, borderRadius: 12, padding: "13px 15px", marginBottom: 8,
-                    border: `1px solid ${C.border}`,
-                    borderLeft: `4px solid ${item.done ? C.border : "#8e44ad"}`,
-                    opacity: item.done ? 0.5 : 1,
-                    display: "flex", alignItems: "center", gap: 12,
-                  }}>
-                    <button onClick={() => setShopItems(prev => prev.map(i => i.id === item.id ? { ...i, done: !i.done } : i))}
-                      style={{
-                        width: 24, height: 24, borderRadius: 6, flexShrink: 0,
-                        border: `2px solid ${item.done ? C.green : C.border}`,
-                        background: item.done ? C.green : "#fff",
-                        cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                        color: "#fff", fontWeight: 700, fontSize: 13,
-                      }}>{item.done ? "✓" : ""}</button>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: 15, textDecoration: item.done ? "line-through" : "none" }}>
-                        {item.name}
-                      </div>
-                      <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
-                        {item.menge && `${item.menge} ${item.einheit}`}
-                        {item.note && (item.menge ? " · " : "") + item.note}
-                      </div>
-                    </div>
-                    <button onClick={() => setShopItems(prev => prev.filter(i => i.id !== item.id))}
-                      style={{ background: "none", border: "none", color: "#ccc", cursor: "pointer", fontSize: 16 }}>✕</button>
-                  </div>
-                ))}
-
-                {shopItems.some(i => i.done) && (
-                  <button onClick={() => setShopItems(prev => prev.filter(i => !i.done))}
-                    style={{ width: "100%", marginTop: 4, padding: "10px", borderRadius: 10,
-                      border: `1px solid ${C.border}`, background: "#fff",
-                      color: C.muted, fontSize: 13, cursor: "pointer" }}>
-                    Erledigte löschen
-                  </button>
-                )}
-              </>
-            )}
-          </>
-        )}
 
       </div>
     </div>
   );
 }
-
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
