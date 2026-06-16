@@ -1,15 +1,24 @@
-# Naturpool Backend
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-## Deployment auf Vercel
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-1. Diese ZIP-Datei entpacken
-2. Auf vercel.com einloggen
-3. "Add New Project" → "Deploy" → Ordner hochladen
-4. Unter "Environment Variables" eintragen:
-   - Name: `ANTHROPIC_API_KEY`
-   - Value: dein API-Key (beginnt mit sk-ant-...)
-5. Deploy klicken
-
-## Endpunkte
-
-- `POST /api/chat` → KI-Chat & Bildanalyse
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
