@@ -141,6 +141,14 @@ function App() {
   const [shopEinheit, setShopEinheit] = useState("g");
   const [shopNote, setShopNote] = useState("");
 
+  // Chat
+  const [chatMessages, setChatMessages] = useState([
+    {role:"assistant",text:"Hallo! Ich bin dein Naturpool-Assistent 🌿 Frag mich alles rund um deinen Pool — pH-Wert, Pflege, Mittel oder Probleme."}
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = React.useRef(null);
+
 
 
   useEffect(() => {
@@ -194,6 +202,36 @@ Antworte NUR mit einem JSON-Objekt in diesem Format (kein anderer Text):
       setScanError("Analyse fehlgeschlagen: " + e.message);
     }
     setScanLoading(false);
+  }
+
+  async function sendChat() {
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
+    const history = [...chatMessages, {role:"user",text}];
+    setChatMessages(history);
+    setChatInput("");
+    setChatLoading(true);
+    const phInfo = phEntries.length
+      ? `Letzter pH: ${phEntries[0].ph.toFixed(1)}, Durchschnitt: ${avgPh.toFixed(2)}`
+      : "Keine pH-Daten";
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/chat`, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-6",
+          max_tokens:1000,
+          system:`Du bist ein freundlicher Naturpool-Experte. Antworte auf Deutsch, kurz und praktisch. Pool-Daten: ${phInfo}. Max 100 Wörter.`,
+          messages:history.map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.text}))
+        })
+      });
+      const data = await res.json();
+      const reply = data.content?.filter(b=>b.type==="text").map(b=>b.text).join("") || "Keine Antwort.";
+      setChatMessages(prev=>[...prev,{role:"assistant",text:reply}]);
+    } catch(e) {
+      setChatMessages(prev=>[...prev,{role:"assistant",text:"Verbindungsfehler: "+e.message}]);
+    }
+    setChatLoading(false);
   }
 
   function addEntry() {
