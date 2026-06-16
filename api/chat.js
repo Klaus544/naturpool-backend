@@ -1,12 +1,23 @@
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+export const config = { runtime: "edge" };
 
-  if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+export default async function handler(req) {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json",
+  };
+
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 200, headers });
+  }
+
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers });
+  }
 
   try {
+    const body = await req.json();
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -14,11 +25,14 @@ export default async function handler(req, res) {
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(body),
     });
     const data = await response.json();
-    res.status(200).json(data);
+    return new Response(JSON.stringify(data), { status: 200, headers });
   } catch(e) {
-    res.status(500).json({ error: e.message });
+    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers });
   }
-}Claude Fable 5 is currently unavailable.
+}
+
+"Commit changes"
+Claude Fable 5 is curre
