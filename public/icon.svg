@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="108" fill="#1a5c3f"/>
+  <rect x="72" y="176" width="368" height="240" rx="10" fill="#e8f0ec"/>
+  <rect x="80" y="184" width="352" height="224" rx="6" fill="#4fc3d4"/>
+  <rect x="60" y="148" width="392" height="32" rx="6" fill="#d4c4a0"/>
+  <rect x="60" y="416" width="392" height="30" rx="6" fill="#d4c4a0"/>
+  <path d="M120 220 Q160 210 200 222 Q240 234 280 220 Q320 206 360 220" stroke="white" stroke-width="3" fill="none" opacity="0.4" stroke-linecap="round"/>
+  <path d="M100 260 Q150 248 210 262 Q270 276 330 260 Q380 248 420 260" stroke="white" stroke-width="2" fill="none" opacity="0.25" stroke-linecap="round"/>
+  <rect x="398" y="180" width="6" height="80" rx="3" fill="#c8d8cc" opacity="0.9"/>
+  <rect x="418" y="180" width="6" height="80" rx="3" fill="#c8d8cc" opacity="0.9"/>
+  <rect x="396" y="204" width="30" height="5" rx="2" fill="#b0c8bc" opacity="0.8"/>
+  <rect x="396" y="228" width="30" height="5" rx="2" fill="#b0c8bc" opacity="0.8"/>
+  <rect x="396" y="252" width="30" height="5" rx="2" fill="#b0c8bc" opacity="0.8"/>
+  <rect x="186" y="226" width="140" height="60" rx="30" fill="#0d2218" opacity="0.75"/>
+  <text x="256" y="252" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="300" fill="#7ae8b8" text-anchor="middle" letter-spacing="4">pH</text>
+  <text x="256" y="275" font-family="Helvetica,Arial,sans-serif" font-size="20" font-weight="700" fill="white" text-anchor="middle">7.4</text>
+</svg>
